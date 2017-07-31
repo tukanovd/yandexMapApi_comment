@@ -1,5 +1,7 @@
-var convertCoordsToAddress = require('./getAdressFromCoords'),
-    convertAddressToCoords = require('./getCoordsFromAddress'),
+var convertCoordsToAddress = require('./getAdressFromCoords').getAddress,
+    convertAddressToCoords = require('./getCoordsFromAddress').getCoords,
+    setClusterer = require('./clusterer').setClusterer,
+    getCustomBaloon = require('./balloonContentLayoutModel').getCustomBalloonLayout,
     map,
     myClusterer,
     rewiewTemplate = `
@@ -22,7 +24,7 @@ new Promise(resolve => window.onload = resolve)
             zoom: 10
         });
         setStorageEventListener();
-        setClusterer();
+        myClusterer = setClusterer();
         map.geoObjects.add(myClusterer);
 
         if (localStorage.length > 0) {
@@ -32,7 +34,7 @@ new Promise(resolve => window.onload = resolve)
         map.events.add('click', (e) => {
             var coords = e.get('coords');
 
-            convertCoordsToAddress.getAddress(coords)
+            convertCoordsToAddress(coords)
                 .then(res => {
                     getBalloon(res, coords);
                 })
@@ -54,11 +56,6 @@ function getPointsFromStorage(storage) {
         }
     }
 };
-function openBallonFromClusterer(e) {
-    convertAddressToCoords.getCoords(e.innerHTML).then((res) => {
-        getBalloon({address: e.innerHTML}, res);
-    });
-}
 
 function setStorageEventListener() {
     var originalSetItem = localStorage.setItem;
@@ -77,32 +74,6 @@ function setStorageEventListener() {
 
     document.addEventListener("itemInserted", storageHandler);
 };
-function setClusterer() {
-    let clustererLayout = ymaps.templateLayoutFactory.createClass(
-        '<h2 class=ballon_header> {{properties.place|raw}}</h2>' +
-        '<div class=ballon_body>' +
-        '<a href="#" id="addressCarousel">{{properties.address|raw}}</a></br>' +
-        '{{properties.review|raw}}' +
-        '</div>' +
-        '<div class=ballon_footer>{{properties.date|raw}}</div>');
-
-    myClusterer = new ymaps.Clusterer({
-        clusterDisableClickZoom: true,
-        clusterBalloonContentLayout: 'cluster#balloonCarousel',
-        clusterBalloonItemContentLayout: clustererLayout,
-        clusterBalloonPanelMaxMapArea: 0,
-        clusterBalloonContentLayoutWidth: 200,
-        clusterBalloonContentLayoutHeight: 130,
-        clusterBalloonPagerSize: 5
-    });
-    myClusterer.balloon.events.add('open', (e) => {
-        var addressLink = document.querySelector('#addressCarousel');
-
-        addressLink.addEventListener('click', function () {
-            openBallonFromClusterer(this);
-        })
-    });
-};
 
 function getBalloon(data = {}, coords) {
     setMapOptions(data);
@@ -111,11 +82,11 @@ function getBalloon(data = {}, coords) {
 };
 
 function setMapOptions(data) {
-    let getCustomBaloon = require('./balloonContentLayoutModel');
+
 
     map.balloon.setOptions({
         offset: [0, -20],
-        'layout': getCustomBaloon.getCustomBalloonLayout(data)
+        'layout': getCustomBaloon(data)
     });
 
     map.events.add(['balloonopen'], (e) => {
@@ -136,7 +107,7 @@ function submitReview(target) {
         review = target.querySelector('#comment'),
         address = target.parentElement.querySelector('.header_address').innerHTML;
 
-    convertAddressToCoords.getCoords(address).then((coords) => {
+    convertAddressToCoords(address).then((coords) => {
         let data = {
                 date: getCurrentDate(),
                 coords: coords,
@@ -151,7 +122,7 @@ function submitReview(target) {
         obj[address] = [];
         myClusterer.add(newPlacemark);
         if (localStorage.hasOwnProperty(address)) {
-            obj[address] = (JSON.parse(localStorage.getItem(address)).concat(data));
+            obj[address] = JSON.parse(localStorage.getItem(address)).concat(data);
         }
         else {
             obj[address].push(data);
@@ -180,7 +151,7 @@ function showRewiews(address, obj) {
     let doc = document.querySelector('#reviews'),
         tempFn = Handlebars.compile(rewiewTemplate),
         temp = tempFn({address: obj});
-
+    debugger;
     doc.innerHTML = temp;
 };
 

@@ -1,6 +1,5 @@
-// Определяем адрес по координатам (обратное геокодирование).
 module.exports = {
-    getAddress(coords, myPlacemark) {
+    getAddress(coords) {
         return ymaps.geocode(coords).then(function (res) {
             var firstGeoObject = res.geoObjects.get(0),
                 v = {

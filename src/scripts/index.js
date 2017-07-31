@@ -82,8 +82,6 @@ function getBalloon(data = {}, coords) {
 };
 
 function setMapOptions(data) {
-
-
     map.balloon.setOptions({
         offset: [0, -20],
         'layout': getCustomBaloon(data)
@@ -151,7 +149,7 @@ function showRewiews(address, obj) {
     let doc = document.querySelector('#reviews'),
         tempFn = Handlebars.compile(rewiewTemplate),
         temp = tempFn({address: obj});
-    debugger;
+
     doc.innerHTML = temp;
 };
 

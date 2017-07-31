@@ -1,4 +1,4 @@
-var template = require(`./src/template/newModal.hbs`);
+var template = require(`../template/newModal.hbs`);
 
 module.exports = {
     getCustomBalloonLayout(data = {}, myMap) {

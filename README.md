@@ -1,4 +1,4 @@
-LoftSchool JS project №2 - GEO comment / GEO отзыв
+## LoftSchool JS project №2 - GEO comment / GEO отзыв
 
 Используется API Яндекс.Карт. На карте можно по клику отмечать места и оставлять по ним отзывы. 
 Отзывы группируется в кластеры. 
